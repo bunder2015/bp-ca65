@@ -5,32 +5,41 @@ mapperfile = mmc1.cfg
 CA65 = ca65
 LD65 = ld65
 
-prgfiles = \
-prg/bank0.s prg/bank1.s prg/bank2.s prg/bank3.s \
-prg/bank4.s prg/bank5.s prg/bank6.s prg/bank7.s \
-prg/bank8.s prg/bank9.s prg/bank10.s prg/bank11.s \
-prg/bank12.s prg/bank13.s prg/bank14.s prg/bank15.s
+objlist = main mmc1 \
+bank0 bank1 bank2 bank3 \
+bank4 bank5 bank6 bank7 \
+bank8 bank9 bank10 bank11 \
+bank12 bank13 bank14 bank15
+
+chrfiles = bank0 bank1 bank2 bank3 \
+bank4 bank5 bank6 bank7 \
+bank8 bank9 bank10 bank11 \
+bank12 bank13 bank14 bank15
 
 incfiles = global.inc mmc1.inc
 
-objlist = main.s mmc1.s $(prgfiles) $(incfiles)
+.PHONY: clean
 
 all: bin/$(title).nes
 
 clean:
-	-rm bin/*.o bin/$(title).nes
+	-rm bin/*.o bin/$(title).nes bin/$(title).dbg bin/map.txt
 
 bin/:
 	-mkdir bin
 
-bin/$(title).o: bin/ $(objlist)
-	$(CA65) -g \
-		-t nes \
-		-o bin/$(title).o \
-		main.s
+objlisto = $(foreach o,$(objlist),bin/$(o).o)
 
-bin/$(title).nes: bin/$(title).o $(mapperfile)
-	$(LD65) -o bin/$(title).nes \
-		-C $(mapperfile) \
-		--dbgfile bin/$(title).dbg \
-		bin/$(title).o
+bin/map.txt bin/$(title).nes: $(mapperfile) $(objlisto)
+	ld65 --dbgfile bin/$(title).dbg -m bin/map.txt -o bin/$(title).nes -C $^
+
+chrlist = $(foreach c,$(chrfiles),chr/$(c).chr)
+
+bin/main.o: main.s $(incfiles) $(chrlist)
+	ca65 $< -o $@
+
+bin/%.o: %.s $(incfiles)
+	ca65 $< -o $@
+
+bin/%.o: prg/%.s $(incfiles)
+	ca65 $< -o $@

@@ -1,4 +1,7 @@
+.include "../global.inc"
+
 .segment "PAGE0"
 
-MAIN:
+.proc MAIN
 	JMP MAIN
+.endproc

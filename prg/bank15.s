@@ -1,8 +1,15 @@
+.include "../global.inc"
+
 .segment "PAGE15"
 
-NMI:
+.proc NMI
 	RTI
-RESET:
+.endproc
+
+.proc RESET
 	JMP MAIN
-IRQ:
+.endproc
+
+.proc IRQ
 	RTI
+.endproc
