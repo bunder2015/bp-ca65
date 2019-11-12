@@ -1,0 +1,8 @@
+.segment "PAGE15"
+
+NMI:
+	RTI
+RESET:
+	JMP MAIN
+IRQ:
+	RTI
