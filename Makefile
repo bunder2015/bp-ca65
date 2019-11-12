@@ -36,10 +36,10 @@ bin/map.txt bin/$(title).nes: $(mapperfile) $(objlisto)
 chrlist = $(foreach c,$(chrfiles),chr/$(c).chr)
 
 bin/main.o: main.s $(incfiles) $(chrlist)
-	ca65 $< -o $@
+	ca65 -g $< -o $@
 
 bin/%.o: %.s $(incfiles)
-	ca65 $< -o $@
+	ca65 -g $< -o $@
 
 bin/%.o: prg/%.s $(incfiles)
-	ca65 $< -o $@
+	ca65 -g $< -o $@
