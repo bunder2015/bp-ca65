@@ -18,7 +18,7 @@ objlist = main.s mmc1.s $(prgfiles) $(incfiles)
 all: bin/$(title).nes
 
 clean:
-	-rm bin/*.o $(title).nes
+	-rm bin/*.o bin/$(title).nes
 
 bin/:
 	-mkdir bin
