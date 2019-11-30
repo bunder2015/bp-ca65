@@ -18,8 +18,8 @@ title = boilerplate
 objlist = apu cpu debug joys mainmenu \
 mmc1 nes options ppu sram text vectors
 
-AS65 = ca65
-LD65 = ld65
+AS65 = ca65 -g
+LD65 = ld65 --dbgfile $(title).dbg -m map.txt
 objdir = obj/nes
 srcdir = prg
 imgdir = chr
@@ -39,10 +39,9 @@ $(objdir)/: Makefile
 objlisto = $(foreach o,$(objlist),$(objdir)/$(o).o)
 
 map.txt $(title).nes: mmc1.cfg $(objlisto)
-	$(LD65) --dbgfile $(title).dbg -o $(title).nes -m map.txt -C $^
+	$(LD65) -o $(title).nes -C $^
 
 $(objdir)/%.o: $(srcdir)/%.s
-	$(AS65) -g $< -o $@
+	$(AS65) $< -o $@
 
 $(objdir)/nes.o: $(imgdir)/*.chr
-
