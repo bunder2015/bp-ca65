@@ -1,45 +1,44 @@
+#!/usr/bin/make -f
+#
+# Makefile for NES game
+# Copyright 2011-2015 Damian Yerrick
+#
+# Copying and distribution of this file, with or without
+# modification, are permitted in any medium without royalty
+# provided the copyright notice and this notice are preserved.
+# This file is offered as-is, without any warranty.
+#
+
+# This is the title of the NES program.
 title = boilerplate
-version = 0.0.0
-mapperfile = mmc1.cfg
 
-CA65 = ca65
+# Space-separated list of assembly language files that make up the
+# PRG ROM.  If it gets too long for one line, you can add a backslash
+# (the \ character) at the end of the line and continue on the next.
+objlist = apu cpu debug joys mainmenu mmc1 nes options ppu sram text vectors
+
+AS65 = ca65
 LD65 = ld65
+objdir = obj/nes
+srcdir = prg
+imgdir = chr
 
-objlist = main mmc1 \
-bank0 bank1 bank2 bank3 \
-bank4 bank5 bank6 bank7 \
-bank8 bank9 bank10 bank11 \
-bank12 bank13 bank14 bank15
-
-chrfiles = bank0 bank1 bank2 bank3 \
-bank4 bank5 bank6 bank7 \
-bank8 bank9 bank10 bank11 \
-bank12 bank13 bank14 bank15
-
-incfiles = global.inc mmc1.inc
-
+# Pseudo-targets
 .PHONY: clean
 
-all: bin/$(title).nes
+all: $(title).nes
 
 clean:
-	-rm bin/*.o bin/$(title).nes bin/$(title).dbg bin/map.txt
+	-rm $(objdir)/*.o
 
-bin/:
-	-mkdir bin
+# Rules for PRG ROM
+objlisto = $(foreach o,$(objlist),$(objdir)/$(o).o)
 
-objlisto = $(foreach o,$(objlist),bin/$(o).o)
+map.txt $(title).nes: mmc1.cfg $(objlisto)
+	$(LD65) --dbgfile $(title).dbg -o $(title).nes -m map.txt -C $^
 
-bin/map.txt bin/$(title).nes: $(mapperfile) $(objlisto)
-	ld65 --dbgfile bin/$(title).dbg -m bin/map.txt -o bin/$(title).nes -C $^
+$(objdir)/%.o: $(srcdir)/%.s
+	$(AS65) $< -o $@
 
-chrlist = $(foreach c,$(chrfiles),chr/$(c).chr)
+$(objdir)/nes.o: $(imgdir)/*.chr
 
-bin/main.o: main.s $(incfiles) $(chrlist)
-	ca65 -g $< -o $@
-
-bin/%.o: %.s $(incfiles)
-	ca65 -g $< -o $@
-
-bin/%.o: prg/%.s $(incfiles)
-	ca65 -g $< -o $@
