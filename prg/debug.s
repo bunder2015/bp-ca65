@@ -1,3 +1,4 @@
+.include "debug.inc"
 .include "ppu.inc"
 .include "text.inc"
 

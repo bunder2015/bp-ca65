@@ -1,4 +1,5 @@
 .include "ppu.inc"
+.include "text.inc"
 
 .segment "ZEROPAGE"
 PBINPUT:	.res 2	; PRINT1BYTE/PRINT2BYTES input

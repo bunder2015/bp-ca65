@@ -39,7 +39,7 @@ OPTIONSTEXT2:
 OPTIONSTEXT3:
 	.byte "Return to main menu"
 
-.segment "MENU"
+.segment "MENUS"
 .proc OPTIONS
 	LDA #REND_DIS
 	STA SPREN

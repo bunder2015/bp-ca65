@@ -5,6 +5,7 @@
 .include "mainmenu.inc"
 .include "mmc1.inc"
 .include "ppu.inc"
+.include "vectors.inc"
 
 .segment "VECS"
 .proc NMI

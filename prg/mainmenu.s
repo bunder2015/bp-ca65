@@ -52,7 +52,7 @@ MENUTEXT2:
 MENUTEXT3:
 	.byte "Options"
 
-.segment "MENU"
+.segment "MENUS"
 .proc MAINMENU
 	LDA #REND_DIS
 	STA SPREN
