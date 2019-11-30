@@ -27,10 +27,13 @@ imgdir = chr
 # Pseudo-targets
 .PHONY: clean
 
-all: $(title).nes
+all: $(objdir)/ $(title).nes
 
 clean:
 	-rm $(objdir)/*.o $(title).nes $(title).dbg map.txt
+
+$(objdir)/: Makefile
+	mkdir -p $(objdir)
 
 # Rules for PRG ROM
 objlisto = $(foreach o,$(objlist),$(objdir)/$(o).o)
