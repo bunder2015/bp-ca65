@@ -5,7 +5,7 @@
 ; TODO - put data here
 
 .segment "LVL1S"
-.proc NEWGAME
+.proc LEVEL1
 	LDA #REND_DIS
 	STA SPREN
 	STA BGEN
@@ -22,14 +22,14 @@
 	JSR UPDATEPPUCTRL	; Update PPU controls
 
 	JSR VBWAIT		; Wait for next vblank
-	JMP STARTLOOP		; Enter input loop
+	JMP LEVEL1LOOP		; Enter input loop
 .endproc
 
-.proc STARTLOOP
+.proc LEVEL1LOOP
 	;; TODO - Input
 	BRK
 
 DONE:
 	JSR VBWAIT		; Wait for next vblank
-	JMP STARTLOOP
+	JMP LEVEL1LOOP
 .endproc

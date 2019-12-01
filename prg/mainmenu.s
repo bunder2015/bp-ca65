@@ -16,7 +16,7 @@ MENUDRAWN:	.res 1	; Whether the menu screen has been drawn
 	STA MMCPRG
 	JSR UPDATEMMC1PRG	; Switch bank to bank 1
 
-	JMP NEWGAME		; Start new game
+	JMP LEVEL1		; Start new game
 .endproc
 
 .segment "MENUD"
