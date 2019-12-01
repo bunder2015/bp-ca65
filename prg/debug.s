@@ -55,7 +55,9 @@ DEC2:
 	STA BGEN
 	JSR UPDATEPPUMASK	; Disable rendering
 
-	JSR CLEARSCREEN
+	JSR CLEARSCREEN		; Clear the screen of tiles and sprites
+
+	JSR VBWAIT		; Wait for the next vblank to draw register output
 
 	LDA #$3F
 	STA PPUCADDR

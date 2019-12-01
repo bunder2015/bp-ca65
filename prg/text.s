@@ -83,6 +83,6 @@ ALPHARIGHT:
 PRINTRIGHT:
 	STA PPUDATA			; Write to PPU
 
-	JSR VBWAIT
+	JSR VBWAIT			; Wait for next vblank so we don't write too much data at once
 	RTS
 .endproc

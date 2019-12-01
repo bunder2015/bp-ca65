@@ -37,7 +37,7 @@ SPRITES:	.res 252	; The other sprites
 
 .segment "FUNCS"
 .proc CLEARSCREEN
-	;; Clears the tiles on the screen and all sprites
+	;; Clears the tiles on the screen and all sprites, takes 2 frames to execute
 	;; Input: none
 	;; Clobbers: A X Y
 	LDA #REND_DIS
@@ -68,7 +68,7 @@ L1:
 	CPX PPUCLEN
 	BNE L1
 
-	JSR VBWAIT		; Wait for next vblank
+	JSR VBWAIT		; Wait for next vblank so we don't write too much data at once
 
 	BIT PPUSTATUS		; Read PPUSTATUS to reset PPUADDR latch
 	LDA #$3F

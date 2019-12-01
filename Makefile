@@ -15,7 +15,7 @@ title = boilerplate
 # Space-separated list of assembly language files that make up the
 # PRG ROM.  If it gets too long for one line, you can add a backslash
 # (the \ character) at the end of the line and continue on the next.
-objlist = apu cpu debug joys mainmenu \
+objlist = apu cpu debug joys level1 mainmenu \
 mmc1 nes options ppu sram text vectors
 
 # Locations for files used in building

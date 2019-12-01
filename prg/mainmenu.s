@@ -1,10 +1,23 @@
 .include "apu.inc"
 .include "joys.inc"
+.include "level1.inc"
 .include "mainmenu.inc"
 .include "mmc1.inc"
 .include "options.inc"
 .include "ppu.inc"
 .include "sram.inc"
+
+.segment "BSS"
+MENUDRAWN:	.res 1	; Whether the menu screen has been drawn
+
+.segment "FUNCS"
+.proc STARTNEWGAME
+	LDA #MMC1_PRG_BANK1
+	STA MMCPRG
+	JSR UPDATEMMC1PRG	; Switch bank to bank 1
+
+	JMP NEWGAME		; Start new game
+.endproc
 
 .segment "MENUD"
 MENUATTR:
@@ -54,6 +67,10 @@ MENUTEXT3:
 
 .segment "MENUS"
 .proc MAINMENU
+	LDA MENUDRAWN
+	BEQ DRAW
+	JMP RETURNTOMENU
+DRAW:
 	LDA #REND_DIS
 	STA SPREN
 	STA BGEN
@@ -132,7 +149,9 @@ MENUTEXT3:
 	STA PPUCINPUT+1
 	JSR PPUCOPY		; Load menu BG attributes into PPU
 
-RETFROMOPTIONS:
+	LDA #1
+	STA MENUDRAWN
+RETURNTOMENU:
 	; We return here from the options screen since the main menu screen should already be
 	; drawn from the initial startup
 	LDA #BG_PT0
@@ -159,7 +178,7 @@ SRAMTESTSTART:
 	JSR UPDATEMMC1PRG	; Enable PRG RAM
 
 	JSR SRAMTESTA		; Verify header and footer
-	BNE SRAMTESTRUNC	; TODO - change to B when we have checksums
+	BNE SRAMTESTRUNC	; TODO - change to B when we have a checksum test
 	JMP SRAMTESTFAIL
 ;SRAMTESTRUNB:
 ;	JSR SRAMTESTB		; Verify option variable checksum
@@ -168,7 +187,6 @@ SRAMTESTSTART:
 SRAMTESTRUNC:
 	JSR SRAMTESTC		; Verify option variable bounds
 	BNE SRAMTESTDONE
-
 	;; TODO - additional tests here?
 SRAMTESTFAIL:
 	; We failed a test, wipe PRG RAM
@@ -243,8 +261,62 @@ OUT:
 .endproc
 
 .proc MENULOOP
+	LDA JOY1IN
+	BNE DOWN
+	JMP DONE		; Skip loop if player 1 is not pressing buttons
 
+DOWN:
+	LDA JOY1IN
+	AND #BUTTON_DOWN	; Check if player 1 is pressing down
+	BEQ UP
+	LDA ARROWY
+	CMP #$90		; Check if the cursor is in the top position
+	BNE MENUDOUT
+	LDA #$A0
+	STA ARROWY		; Move cursor down
+MENUDOUT:
+	JMP DONE
 
+UP:
+	LDA JOY1IN
+	AND #BUTTON_UP		; Check if player 1 is pressing up
+	BEQ STNEW
+	LDA ARROWY
+	CMP #$A0		; Check if the cursor is in the bottom position
+	BNE MENUUOUT
+	LDA #$90
+	STA ARROWY		; Move cursor up
+MENUUOUT:
+	JMP DONE
+
+STNEW:
+	LDA JOY1IN
+	AND #BUTTON_START	; Check if player 1 is pressing start
+	BEQ DONE
+	LDA ARROWY
+	CMP #$90		; Check if the cursor is in the top position
+	BNE STOPTS
+;	JSR pause_song		; Stop music
+	JSR CLEARSCREEN		; Clear screen
+	LDA #0
+	STA MENUDRAWN
+	STA OPTIONSDRAWN
+	LDA CONTINUELEVEL
+	BNE STCONTINUE
+	JMP STARTNEWGAME	; Go to new game
+STCONTINUE:
+	LDA CONTINUELEVEL
+	;; TODO - jump to level
+	BRK
+STOPTS:
+	LDA ARROWY
+	CMP #$A0		; Check if the cursor is in the bottom position
+	BNE DONE
+	JSR CLEARSPR		; Clear sprites
+	JSR VBWAIT
+	JMP OPTIONS		; Go to game options menu
+
+DONE:
 	JSR VBWAIT		; Wait for next vblank
 	JMP MENULOOP		; Repeat input loop
 .endproc
