@@ -111,9 +111,9 @@ MMC1INIT:
 	STA MMCCHR1		; CHR bank 1 selected at PPU $1000
 	JSR UPDATEMMC1CHR1
 
-;	LDA #NMI_EN
-;	STA NMIEN		; Enable NMI
-;	JSR UPDATEPPUCTRL
+	LDA #NMI_EN
+	STA NMIEN		; Enable NMI
+	JSR UPDATEPPUCTRL
 	JSR CLEARSCREEN		; Clear the screen
 	JMP MAINMENU		; Go to main menu
 .endproc
