@@ -177,7 +177,7 @@ SRAMTESTDONE:
 ; sound init code here
 
 	LDA MUSICEN
-	BEQ SKIPTEST	; Check if music is enabled
+	BEQ SKIPTEST		; Check if music is enabled
 
 ; play music here
 

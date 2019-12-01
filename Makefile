@@ -18,19 +18,26 @@ title = boilerplate
 objlist = apu cpu debug joys mainmenu \
 mmc1 nes options ppu sram text vectors
 
-AS65 = ca65 -g
-LD65 = ld65 --dbgfile $(title).dbg -m map.txt
-objdir = obj/nes
+# Locations for files used in building
+bindir = bin
+objdir = obj
 srcdir = prg
 imgdir = chr
+
+AS65 = ca65 -g
+LD65 = ld65 --dbgfile $(bindir)/$(title).dbg -m $(bindir)/map.txt
 
 # Pseudo-targets
 .PHONY: clean
 
-all: $(objdir)/ $(title).nes
+all: $(bindir)/ $(objdir)/ $(bindir)/$(title).nes
 
 clean:
-	-rm $(objdir)/*.o $(title).nes $(title).dbg map.txt
+	-rm $(objdir)/*.o $(bindir)/$(title).nes $(bindir)/$(title).dbg $(bindir)/map.txt
+
+# Create empty directories for build
+$(bindir)/: Makefile
+	mkdir -p $(bindir)
 
 $(objdir)/: Makefile
 	mkdir -p $(objdir)
@@ -38,10 +45,11 @@ $(objdir)/: Makefile
 # Rules for PRG ROM
 objlisto = $(foreach o,$(objlist),$(objdir)/$(o).o)
 
-map.txt $(title).nes: mmc1.cfg $(objlisto)
-	$(LD65) -o $(title).nes -C $^
+$(bindir)/map.txt $(bindir)/$(title).nes: mmc1.cfg $(objlisto)
+	$(LD65) -o $(bindir)/$(title).nes -C $^
 
 $(objdir)/%.o: $(srcdir)/%.s
 	$(AS65) $< -o $@
 
+# Rules for CHR ROM
 $(objdir)/nes.o: $(imgdir)/*.chr
