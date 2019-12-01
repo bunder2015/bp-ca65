@@ -1,5 +1,7 @@
 .include "cpu.inc"
+.include "mainmenu.inc"
 .include "sram.inc"
+.include "ppu.inc"
 
 .segment "ZEROPAGE"
 STEMP:		.res 2	; SRAMWIPE temp variable
@@ -19,6 +21,112 @@ SRAMFOOTERTEXT:	.byte "DISCOMBOBULATION"
 SRAMHEADERTEXT:	.byte "THERMOTELEPHONIC"
 
 .segment "FUNCS"
+
+.proc HIDESAVEICON
+	;; Removes the save icon from the screen
+	;; Input: None
+	;; Clobbers: A Y
+	LDA #$FF
+	LDY #0
+L1:
+	STA SAVEICON1Y, Y
+	INY
+	CPY #16
+	BNE L1
+
+	RTS
+.endproc
+
+.proc SHOWERRORICON
+	;; Shows an error icon on the screen
+	;; Input: None
+	;; Clobbers: A
+	LDA #$D8
+	STA ERRORICON1X
+	LDA #$D8
+	STA ERRORICON1Y
+	LDA #$E0
+	STA ERRORICON1TILE
+	LDA #SPR_PALETTE3
+	STA ERRORICON1ATTR	; Top left
+
+	LDA #$E0
+	STA ERRORICON2X
+	LDA #$D8
+	STA ERRORICON2Y
+	LDA #$E1
+	STA ERRORICON2TILE
+	LDA #SPR_PALETTE3
+	STA ERRORICON2ATTR	; Top right
+
+	LDA #$D8
+	STA ERRORICON3X
+	LDA #$E0
+	STA ERRORICON3Y
+	LDA #$F0
+	STA ERRORICON3TILE
+	LDA #SPR_PALETTE3
+	STA ERRORICON3ATTR	; Bottom left
+
+	LDA #$E0
+	STA ERRORICON4X
+	LDA #$E0
+	STA ERRORICON4Y
+	LDA #$F1
+	STA ERRORICON4TILE
+	LDA #SPR_PALETTE3
+	STA ERRORICON4ATTR	; Bottom right
+
+	JSR VBWAIT
+
+	RTS
+.endproc
+
+.proc SHOWSAVEICON
+	;; Shows a save icon on the screen
+	;; Input: None
+	;; Clobbers: A
+	LDA #$E8
+	STA SAVEICON1X
+	LDA #$D8
+	STA SAVEICON1Y
+	LDA #$E2
+	STA SAVEICON1TILE
+	LDA #SPR_PALETTE3
+	STA SAVEICON1ATTR	; Top left
+
+	LDA #$F0
+	STA SAVEICON2X
+	LDA #$D8
+	STA SAVEICON2Y
+	LDA #$E3
+	STA SAVEICON2TILE
+	LDA #SPR_PALETTE3
+	STA SAVEICON2ATTR	; Top right
+
+	LDA #$E8
+	STA SAVEICON3X
+	LDA #$E0
+	STA SAVEICON3Y
+	LDA #$F2
+	STA SAVEICON3TILE
+	LDA #SPR_PALETTE3
+	STA SAVEICON3ATTR	; Bottom left
+
+	LDA #$F0
+	STA SAVEICON4X
+	LDA #$E0
+	STA SAVEICON4Y
+	LDA #$F3
+	STA SAVEICON4TILE
+	LDA #SPR_PALETTE3
+	STA SAVEICON4ATTR	; Bottom right
+
+	JSR VBWAIT
+
+	RTS
+.endproc
+
 .proc SRAMTESTA
 	;; Verifies the PRG RAM header and footer, returns 1 on success
 	;; Input: none

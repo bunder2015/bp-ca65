@@ -88,7 +88,7 @@ MENUTEXT3:
 	STA PPUCINPUT
 	LDA #>MENUBG
 	STA PPUCINPUT+1
-	JSR PPUCOPY		; Load menu BG tiles into PPU
+	JSR PPUCOPY		; Load title BG tiles into PPU
 
 	LDA #$21
 	STA PPUCADDR
@@ -102,7 +102,21 @@ MENUTEXT3:
 	STA PPUCINPUT
 	LDA #>MENUTEXT
 	STA PPUCINPUT+1
-	JSR PPUCOPY		; Load menu BG text into PPU
+	JSR PPUCOPY		; Load title BG text into PPU
+
+	LDA #$22
+	STA PPUCADDR
+	LDA #$8D
+	STA PPUCADDR+1
+	LDA #0
+	STA PPUCLEN
+	LDA #7
+	STA PPUCLEN+1
+	LDA #<MENUTEXT3
+	STA PPUCINPUT
+	LDA #>MENUTEXT3
+	STA PPUCINPUT+1
+	JSR PPUCOPY		; Load menu options BG text into PPU
 
 	LDA #$23
 	STA PPUCADDR
@@ -136,29 +150,32 @@ RETFROMOPTIONS:
 	LDA SKIPSRAMTEST
 	BEQ SRAMTESTSTART
 	JMP SKIPTEST		; Skip test if we have already run it
-
 SRAMTESTSTART:
-;	JSR SHOWSAVEICON	; Show the save icon while PRG RAM is active
+	; Test the PRG RAM for valid data
+	JSR SHOWSAVEICON	; Show the save icon while PRG RAM is active
 
 	LDA #MMC1_PRGRAM_EN
 	STA MMCRAM
 	JSR UPDATEMMC1PRG	; Enable PRG RAM
 
 	JSR SRAMTESTA		; Verify header and footer
-	BNE SRAMTESTRUNC
+	BNE SRAMTESTRUNC	; TODO - change to B when we have checksums
 	JMP SRAMTESTFAIL
-
+;SRAMTESTRUNB:
+;	JSR SRAMTESTB		; Verify option variable checksum
+;	BNE SRAMTESTRUNC
+;	JMP SRAMTESTFAIL
 SRAMTESTRUNC:
 	JSR SRAMTESTC		; Verify option variable bounds
 	BNE SRAMTESTDONE
-	;; TODO - additional tests here (checksum/etc)
 
+	;; TODO - additional tests here?
 SRAMTESTFAIL:
 	; We failed a test, wipe PRG RAM
-;	JSR SHOWERRORICON	; Show the error icon
+	JSR SHOWERRORICON	; Show the error icon
 	JSR SRAMWIPE		; Wipe PRG RAM
-
 SRAMTESTDONE:
+	; We passed all tests, or working with a freshly initialized PRG RAM
 	LDA SRAMMUSIC
 	STA MUSICEN		; Load music toggle from PRG RAM and store to WRAM
 	LDA SRAMCONTINUE
@@ -168,7 +185,7 @@ SRAMTESTDONE:
 	STA MMCRAM
 	JSR UPDATEMMC1PRG	; Disable PRG RAM until we need it again
 
-;	JSR HIDESAVEICON	; Hide the save icon
+	JSR HIDESAVEICON	; Hide the save icon
 
 	LDA #1
 	STA SKIPSRAMTEST	; Mark tests as done so we can skip them if we run the main menu again
@@ -182,6 +199,7 @@ SRAMTESTDONE:
 ; play music here
 
 SKIPTEST:
+	; We skipped the tests
 	LDX NMITRANSFERS
 
 	LDA #$22
@@ -210,32 +228,15 @@ OUT:
 	INX
 	STX NMITRANSFERS	; Load menu new game / continue text into PPU during NMI
 
-	LDA #$22
-	STA NMIPPUCADDRH, X
-	LDA #$8D
-	STA NMIPPUCADDRL, X
-
-	LDA #0
-	STA NMIPPUCLENH, X
-	LDA #7
-	STA NMIPPUCLENL, X
-
-	LDA #<MENUTEXT3
-	STA NMIPPUCINPUTH, X
-	LDA #>MENUTEXT3
-	STA NMIPPUCINPUTL, X
-
-	INX
-	STX NMITRANSFERS	; Load menu options text into PPU during NMI
-
-;	LDA #$58
-;	STA SPR1X
-;	LDA #$90
-;	STA SPR1Y
-;	LDA #$01
-;	STA SPR1TILE
-;	LDA #SPR_PALETTE0
-;	STA SPR1ATTR		; Draw a basic cursor sprite
+	; TODO - drawing a sprite like this is ugly but works for now
+	LDA #$58
+	STA ARROWX
+	LDA #$90
+	STA ARROWY
+	LDA #$01
+	STA ARROWTILE
+	LDA #SPR_PALETTE0
+	STA ARROWATTR		; Draw a basic cursor sprite
 
 	JSR VBWAIT		; Wait for next vblank
 	JMP MENULOOP		; Enter input loop

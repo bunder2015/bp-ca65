@@ -4,6 +4,7 @@
 .include "mmc1.inc"
 .include "options.inc"
 .include "ppu.inc"
+.include "sram.inc"
 
 .segment "BSS"
 CONTINUELEVEL:	.res 1	; Level to start on from main menu
@@ -45,6 +46,8 @@ OPTIONSTEXT3:
 	STA SPREN
 	STA BGEN
 	JSR UPDATEPPUMASK	; Disable rendering
+
+	;; TODO - We use the main menus palettes
 
 	LDA #$24
 	STA PPUCADDR
@@ -116,7 +119,6 @@ OPTIONSTEXT3:
 	STA PPUCINPUT+1
 	JSR PPUCOPY		; Load menu BG attributes into PPU
 
-	;; TODO - We use the main menus palettes
 	;; TODO - Return here from main menu if we were in the options menu previously
 
 	LDA #BG_PT0
@@ -127,40 +129,44 @@ OPTIONSTEXT3:
 	STA NT			; Select nametable 1
 	JSR UPDATEPPUCTRL	; Update PPU controls
 
+	LDX NMITRANSFERS
+
+	LDA #$27
+	STA NMIPPUCADDRH, X
+	LDA #$D4
+	STA NMIPPUCADDRL, X
+
+	LDA #0
+	STA NMIPPUCLENH, X
+	LDA #3
+	STA NMIPPUCLENL, X
+
 	LDA MUSICEN		; Check if music is disabled
 	BEQ MUSICOFF
 
 	LDA #<MUSICATTRON
-	STA PPUCINPUT
+	STA NMIPPUCINPUTH, X
 	LDA #>MUSICATTRON
-	STA PPUCINPUT+1
+	STA NMIPPUCINPUTL, X
 	JMP MUSICDONE
-
 MUSICOFF:
 	LDA #<MUSICATTROFF
-	STA PPUCINPUT
+	STA NMIPPUCINPUTH, X
 	LDA #>MUSICATTROFF
-	STA PPUCINPUT+1
-
+	STA NMIPPUCINPUTL, X
 MUSICDONE:
-	LDA #$27
-	STA PPUCADDR
-	LDA #$D4
-	STA PPUCADDR+1
-	LDA #0
-	STA PPUCLEN
-	LDA #3
-	STA PPUCLEN+1
-	JSR PPUCOPY		; Change attributes of music toggle based on state
+	INX
+	STX NMITRANSFERS	; Load music on/off toggle attributes into PPU during NMI
 
-;	LDA #$20
-;	STA SPR1X
-;	LDA #$58
-;	STA SPR1Y
-;	LDA #$01
-;	STA SPR1TILE
-;	LDA #SPR_PALETTE0
-;	STA SPR1ATTR		; Draw the options cursor
+	; TODO - drawing a sprite like this is ugly but works for now
+	LDA #$20
+	STA ARROWX
+	LDA #$58
+	STA ARROWY
+	LDA #$01
+	STA ARROWTILE
+	LDA #SPR_PALETTE0
+	STA ARROWATTR		; Draw the options cursor
 
 	JSR VBWAIT		; Wait for next vblank
 	JMP OPTIONSLOOP		; Enter input loop

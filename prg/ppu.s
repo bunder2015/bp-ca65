@@ -68,6 +68,8 @@ L1:
 	CPX PPUCLEN
 	BNE L1
 
+	JSR VBWAIT		; Wait for next vblank
+
 	BIT PPUSTATUS		; Read PPUSTATUS to reset PPUADDR latch
 	LDA #$3F
 	STA PPUADDR
@@ -87,7 +89,6 @@ L2:
 	JSR CLEARSPR		; Clear sprites from screen
 	JSR RESETSCR		; Reset PPU scrolling
 	JSR UPDATEPPUCTRL	; Update PPU controls
-;	JSR VBWAIT		; Wait for next vblank
 
 	RTS
 .endproc
