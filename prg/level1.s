@@ -11,7 +11,7 @@
 	STA BGEN
 	JSR UPDATEPPUMASK	; Disable rendering
 
-	;; TODO - Display new game start
+	; TODO - Display new game start
 
 	LDA #BG_PT0
 	STA BGPT		; Select BG pattern table 0
@@ -26,7 +26,7 @@
 .endproc
 
 .proc LEVEL1LOOP
-	;; TODO - Input
+	; TODO - Input
 	BRK
 
 DONE:

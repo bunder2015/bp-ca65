@@ -321,6 +321,6 @@ DEC2:
 	JSR UPDATEPPUCTRL
 
 LOOP:
-	JSR VBWAIT		; Wait for next vblank
-	JMP LOOP		; Infinite loop
+	;; We have printed the debug information, now we hang indefinitely
+	JMP LOOP
 .endproc

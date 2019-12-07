@@ -68,9 +68,10 @@ MENUTEXT3:
 .segment "MENUS"
 .proc MAINMENU
 	LDA MENUDRAWN
-	BEQ DRAW
+	BEQ DRAW		; Check if we have already drawn the screen
 	JMP RETURNTOMENU
 DRAW:
+	;; Draw the screen
 	LDA #REND_DIS
 	STA SPREN
 	STA BGEN
@@ -152,8 +153,8 @@ DRAW:
 	LDA #1
 	STA MENUDRAWN
 RETURNTOMENU:
-	; We return here from the options screen since the main menu screen should already be
-	; drawn from the initial startup
+	;; We return here from the options screen since the main menu screen should already be
+	;; drawn from the initial startup
 	LDA #BG_PT0
 	STA BGPT		; Select BG pattern table 0
 	LDA #SPR_PT1
@@ -170,7 +171,7 @@ RETURNTOMENU:
 	BEQ SRAMTESTSTART
 	JMP SKIPTEST		; Skip test if we have already run it
 SRAMTESTSTART:
-	; Test the PRG RAM for valid data
+	;; Test the PRG RAM for valid data
 	JSR SHOWSAVEICON	; Show the save icon while PRG RAM is active
 
 	LDA #MMC1_PRGRAM_EN
@@ -187,13 +188,13 @@ SRAMTESTSTART:
 SRAMTESTRUNC:
 	JSR SRAMTESTC		; Verify option variable bounds
 	BNE SRAMTESTDONE
-	;; TODO - additional tests here?
+	; TODO - additional tests here?
 SRAMTESTFAIL:
-	; We failed a test, wipe PRG RAM
+	;; We failed a test, wipe PRG RAM
 	JSR SHOWERRORICON	; Show the error icon
 	JSR SRAMWIPE		; Wipe PRG RAM
 SRAMTESTDONE:
-	; We passed all tests, or working with a freshly initialized PRG RAM
+	;; We passed all tests, or are working with a freshly initialized PRG RAM
 	LDA SRAMMUSIC
 	STA MUSICEN		; Load music toggle from PRG RAM and store to WRAM
 	LDA SRAMCONTINUE
@@ -217,7 +218,7 @@ SRAMTESTDONE:
 ; play music here
 
 SKIPTEST:
-	; We skipped the tests
+	;; We skipped the tests because we ran them already
 	LDX NMITRANSFERS
 
 	LDA #$22
@@ -231,17 +232,17 @@ SKIPTEST:
 	STA NMIPPUCLENL, X
 
 	LDA CONTINUELEVEL
-	BNE CONTINUE
+	BNE CONTINUE		; Check if we are starting a new game or continuing from save
 	LDA #<MENUTEXT1
 	STA NMIPPUCINPUTH, X
 	LDA #>MENUTEXT1
-	STA NMIPPUCINPUTL, X
+	STA NMIPPUCINPUTL, X	; New game text
 	JMP OUT
 CONTINUE:
 	LDA #<MENUTEXT2
 	STA NMIPPUCINPUTH, X
 	LDA #>MENUTEXT2
-	STA NMIPPUCINPUTL, X
+	STA NMIPPUCINPUTL, X	; Continue text
 OUT:
 	INX
 	STX NMITRANSFERS	; Load menu new game / continue text into PPU during NMI
@@ -261,6 +262,8 @@ OUT:
 .endproc
 
 .proc MENULOOP
+	; 58,90 "start/continue" cursor position
+	; 58,A0 "options" cursor position
 	LDA JOY1IN
 	BNE DOWN
 	JMP DONE		; Skip loop if player 1 is not pressing buttons

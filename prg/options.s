@@ -44,15 +44,16 @@ OPTIONSTEXT3:
 .segment "MENUS"
 .proc OPTIONS
 	LDA OPTIONSDRAWN
-	BEQ DRAW
+	BEQ DRAW		; Check if we have already drawn the screen
 	JMP RETURNTOOPTIONS
 DRAW:
+	;; Draw the screen
 	LDA #REND_DIS
 	STA SPREN
 	STA BGEN
 	JSR UPDATEPPUMASK	; Disable rendering
 
-	;; TODO - We use the main menus palettes
+	; TODO - We use the main menus palettes
 
 	LDA #$24
 	STA PPUCADDR
@@ -127,6 +128,8 @@ DRAW:
 	LDA #1
 	STA OPTIONSDRAWN
 RETURNTOOPTIONS:
+	;; We return here from the main menu since the options screen should already be
+	;; drawn from a previous draw
 	LDA #BG_PT0
 	STA BGPT		; Select BG pattern table 0
 	LDA #SPR_PT1
@@ -153,13 +156,13 @@ RETURNTOOPTIONS:
 	LDA #<MUSICATTRON
 	STA NMIPPUCINPUTH, X
 	LDA #>MUSICATTRON
-	STA NMIPPUCINPUTL, X
+	STA NMIPPUCINPUTL, X	; Music on attributes
 	JMP MUSICDONE
 MUSICOFF:
 	LDA #<MUSICATTROFF
 	STA NMIPPUCINPUTH, X
 	LDA #>MUSICATTROFF
-	STA NMIPPUCINPUTL, X
+	STA NMIPPUCINPUTL, X	; Music off attributes
 MUSICDONE:
 	INX
 	STX NMITRANSFERS	; Load music on/off toggle attributes into PPU during NMI
@@ -180,6 +183,7 @@ MUSICDONE:
 
 .proc OPTIONSLOOP
 	; 20,58 "music" cursor position
+	; 20,88 "reset" cursor position
 	; 20,A0 "return" cursor position
 	LDA JOY1IN
 	BNE DOWNMUSIC
