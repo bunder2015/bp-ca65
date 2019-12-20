@@ -320,6 +320,10 @@ DEC2:
 	STA NT			; Select nametable 0
 	JSR UPDATEPPUCTRL
 
+	LDA #0
+	STA SCROLLX
+	STA SCROLLY		; Set scroll to top left corner
+
 LOOP:
 	;; We have printed the debug information, now we hang indefinitely
 	JMP LOOP

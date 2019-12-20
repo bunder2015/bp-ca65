@@ -262,8 +262,8 @@ OUT:
 .endproc
 
 .proc MENULOOP
-	; 58,90 "start/continue" cursor position
-	; 58,A0 "options" cursor position
+	;; 58,90 "start/continue" cursor position
+	;; 58,A0 "options" cursor position
 	LDA JOY1IN
 	BNE DOWN
 	JMP DONE		; Skip loop if player 1 is not pressing buttons

@@ -182,9 +182,9 @@ MUSICDONE:
 .endproc
 
 .proc OPTIONSLOOP
-	; 20,58 "music" cursor position
-	; 20,88 "reset" cursor position
-	; 20,A0 "return" cursor position
+	;; 20,58 "music" cursor position
+	;; 20,88 "reset" cursor position
+	;; 20,A0 "return" cursor position
 	LDA JOY1IN
 	BNE DOWNMUSIC
 	JMP DONE		; Skip loop if player 1 is not pressing buttons
