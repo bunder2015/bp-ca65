@@ -155,7 +155,7 @@ OUT:
 	LDA PPUCADDR+1
 	STA PPUADDR		; Read address and set PPUADDR
 
-	LDX #$FF
+	LDX #$00
 	LDY #$00		; Set loop counters
 L1:
 	LDA (PPUCINPUT), Y	; Load data
@@ -163,11 +163,14 @@ L1:
 	INY
 	CPY PPUCLEN+1
 	BNE L1
-	LDY #$00
+	LDA PPUCLEN
+	BEQ DONE
 	INX
 	CPX PPUCLEN		; Check to see if we have finished copying
-	BNE L1			; Loop if we have not finished copying
-
+	BEQ DONE		; Loop if we have not finished copying
+	INC PPUCINPUT+1
+	JMP L1
+DONE:
 	JSR RESETSCR		; Reset PPU scrolling
 
 	RTS

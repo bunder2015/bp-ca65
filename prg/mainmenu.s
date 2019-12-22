@@ -20,50 +20,21 @@ MENUDRAWN:	.res 1	; Whether the menu screen has been drawn
 .endproc
 
 .segment "MENUD"
-MENUATTR:
-	.byte $00,$00,$00,$00,$00,$00,$00,$00	; Top 2 rows of screen
-	.byte $00,$00,$00,$00,$00,$00,$00,$00	; Second 2 rows of screen
-	.byte $00,$00,$55,$55,$55,$55,$11,$00	; Third 2 rows of screen
-	.byte $00,$00,$05,$05,$05,$05,$01,$00	; Fourth 2 rows of screen
-	.byte $00,$00,$00,$00,$00,$00,$00,$00	; Fifth 2 rows of screen
-	.byte $00,$00,$00,$00,$00,$00,$00,$00	; Sixth 2 rows of screen
-	.byte $00,$00,$00,$00,$00,$00,$00,$00	; Seventh 2 rows of screen
-	.byte $00,$00,$00,$00,$00,$00,$00,$00	; Last row of screen (lower nibbles)
-
 MENUBG:
-	.byte $00,$00,$00,$00,$00,$00,$00,$00,$80,$81,$81,$81,$81,$81,$81,$81
-	.byte $81,$81,$81,$81,$81,$81,$81,$81,$82,$00,$00,$00,$00,$00,$00,$00	; Row 1 of title
-	.byte $00,$00,$00,$00,$00,$00,$00,$00,$83,$00,$00,$00,$00,$00,$00,$00
-	.byte $00,$00,$00,$00,$00,$00,$00,$00,$84,$00,$00,$00,$00,$00,$00,$00	; Row 2 of title
-	.byte $00,$00,$00,$00,$00,$00,$00,$00,$83,$00,$00,$00,$00,$00,$00,$00
-	.byte $00,$00,$00,$00,$00,$00,$00,$00,$84,$00,$00,$00,$00,$00,$00,$00	; Row 3 of title
-	.byte $00,$00,$00,$00,$00,$00,$00,$00,$83,$00,$00,$00,$00,$00,$00,$00
-	.byte $00,$00,$00,$00,$00,$00,$00,$00,$84,$00,$00,$00,$00,$00,$00,$00	; Row 4 of title
-	.byte $00,$00,$00,$00,$00,$00,$00,$00,$85,$86,$86,$86,$86,$86,$86,$86
-	.byte $86,$86,$86,$86,$86,$86,$86,$86,$87				; Row 5 of title
+	.incbin "mainmenu.nam"
 
 MENUPALS:
-	.byte $0F,$30,$10,$00	; BG palette 0
-	.byte $0F,$2C,$21,$11	; BG palette 1
-	.byte $0F,$13,$10,$00	; BG palette 2
-	.byte $0F,$30,$10,$00	; BG palette 3
-
+	.incbin "mainmenu.pal"
 	.byte $0F,$13,$10,$00	; SPR palette 0
 	.byte $0F,$30,$10,$00	; SPR palette 1
 	.byte $0F,$30,$10,$00	; SPR palette 2
 	.byte $0F,$11,$16,$10	; SPR palette 3
-
-MENUTEXT:
-	.byte "BOILER PLATE!"
 
 MENUTEXT1:
 	.byte "New game"
 
 MENUTEXT2:
 	.byte "Continue"
-
-MENUTEXT3:
-	.byte "Options"
 
 .segment "MENUS"
 .proc MAINMENU
@@ -94,61 +65,19 @@ DRAW:
 	STA PPUCINPUT+1
 	JSR PPUCOPY		; Load palettes into PPU
 
-	LDA #$21
+	LDA #$20
 	STA PPUCADDR
 	LDA #$00
 	STA PPUCADDR+1
-	LDA #0
+	LDA #$04
 	STA PPUCLEN
-	LDA #153
+	LDA #$00
 	STA PPUCLEN+1
 	LDA #<MENUBG
 	STA PPUCINPUT
 	LDA #>MENUBG
 	STA PPUCINPUT+1
-	JSR PPUCOPY		; Load title BG tiles into PPU
-
-	LDA #$21
-	STA PPUCADDR
-	LDA #$4A
-	STA PPUCADDR+1
-	LDA #0
-	STA PPUCLEN
-	LDA #13
-	STA PPUCLEN+1
-	LDA #<MENUTEXT
-	STA PPUCINPUT
-	LDA #>MENUTEXT
-	STA PPUCINPUT+1
-	JSR PPUCOPY		; Load title BG text into PPU
-
-	LDA #$22
-	STA PPUCADDR
-	LDA #$8D
-	STA PPUCADDR+1
-	LDA #0
-	STA PPUCLEN
-	LDA #7
-	STA PPUCLEN+1
-	LDA #<MENUTEXT3
-	STA PPUCINPUT
-	LDA #>MENUTEXT3
-	STA PPUCINPUT+1
-	JSR PPUCOPY		; Load menu options BG text into PPU
-
-	LDA #$23
-	STA PPUCADDR
-	LDA #$C0
-	STA PPUCADDR+1
-	LDA #0
-	STA PPUCLEN
-	LDA #64
-	STA PPUCLEN+1
-	LDA #<MENUATTR
-	STA PPUCINPUT
-	LDA #>MENUATTR
-	STA PPUCINPUT+1
-	JSR PPUCOPY		; Load menu BG attributes into PPU
+	JSR PPUCOPY		; Load main menu BG tiles into PPU
 
 	LDA #1
 	STA MENUDRAWN
@@ -223,7 +152,7 @@ SKIPTEST:
 
 	LDA #$22
 	STA NMIPPUCADDRH, X
-	LDA #$4D
+	LDA #$4C
 	STA NMIPPUCADDRL, X
 
 	LDA #0
@@ -248,7 +177,7 @@ OUT:
 	STX NMITRANSFERS	; Load menu new game / continue text into PPU during NMI
 
 	; TODO - drawing a sprite like this is ugly but works for now
-	LDA #$58
+	LDA #$50
 	STA ARROWX
 	LDA #$90
 	STA ARROWY
@@ -262,8 +191,8 @@ OUT:
 .endproc
 
 .proc MENULOOP
-	;; 58,90 "start/continue" cursor position
-	;; 58,A0 "options" cursor position
+	;; 50,90 "start/continue" cursor position
+	;; 50,A0 "options" cursor position
 	LDA JOY1IN
 	BNE DOWN
 	JMP DONE		; Skip loop if player 1 is not pressing buttons

@@ -14,32 +14,13 @@ SKIPSRAMTEST:	.res 1	; Skip PRG RAM tests
 
 .segment "MENUD"
 MUSICATTROFF:
-	.byte $00,$80,$20
+	.byte $00,$A0
 
 MUSICATTRON:
-	.byte $20,$00,$00
+	.byte $20,$00
 
-OPTIONSATTR:
-	.byte $00,$00,$00,$00,$00,$00,$00,$00	; Top 2 rows of screen
-	.byte $00,$00,$04,$05,$05,$01,$00,$00	; Second 2 rows of screen
-	.byte $00,$00,$00,$00,$00,$00,$00,$00	; Third 2 rows of screen
-	.byte $00,$00,$00,$00,$00,$00,$00,$00	; Fourth 2 rows of screen
-	.byte $00,$00,$00,$00,$00,$00,$00,$00	; Fifth 2 rows of screen
-	.byte $00,$00,$00,$00,$00,$00,$00,$00	; Sixth 2 rows of screen
-	.byte $00,$00,$00,$00,$00,$00,$00,$00	; Seventh 2 rows of screen
-	.byte $00,$00,$00,$00,$00,$00,$00,$00	; Last 2 rows of screen (lower nibbles)
-
-OPTIONSTEXT:
-	.byte "- Options -"
-
-OPTIONSTEXT1:
-	.byte "Music:    On    Off"
-
-OPTIONSTEXT2:
-	.byte "Clear checkpoint"
-
-OPTIONSTEXT3:
-	.byte "Return to main menu"
+OPTIONSBG:
+	.incbin "options.nam"
 
 .segment "MENUS"
 .proc OPTIONS
@@ -57,73 +38,17 @@ DRAW:
 
 	LDA #$24
 	STA PPUCADDR
-	LDA #$AA
+	LDA #$00
 	STA PPUCADDR+1
-	LDA #0
+	LDA #$04
 	STA PPUCLEN
-	LDA #11
+	LDA #$00
 	STA PPUCLEN+1
-	LDA #<OPTIONSTEXT
+	LDA #<OPTIONSBG
 	STA PPUCINPUT
-	LDA #>OPTIONSTEXT
+	LDA #>OPTIONSBG
 	STA PPUCINPUT+1
-	JSR PPUCOPY		; Load options title text into PPU
-
-	LDA #$25
-	STA PPUCADDR
-	LDA #$66
-	STA PPUCADDR+1
-	LDA #0
-	STA PPUCLEN
-	LDA #19
-	STA PPUCLEN+1
-	LDA #<OPTIONSTEXT1
-	STA PPUCINPUT
-	LDA #>OPTIONSTEXT1
-	STA PPUCINPUT+1
-	JSR PPUCOPY		; Load options music text into PPU
-
-	LDA #$26
-	STA PPUCADDR
-	LDA #$26
-	STA PPUCADDR+1
-	LDA #0
-	STA PPUCLEN
-	LDA #16
-	STA PPUCLEN+1
-	LDA #<OPTIONSTEXT2
-	STA PPUCINPUT
-	LDA #>OPTIONSTEXT2
-	STA PPUCINPUT+1
-	JSR PPUCOPY		; Load options reset text into PPU
-
-	LDA #$26
-	STA PPUCADDR
-	LDA #$86
-	STA PPUCADDR+1
-	LDA #0
-	STA PPUCLEN
-	LDA #20
-	STA PPUCLEN+1
-	LDA #<OPTIONSTEXT3
-	STA PPUCINPUT
-	LDA #>OPTIONSTEXT3
-	STA PPUCINPUT+1
-	JSR PPUCOPY		; Load options return text into PPU
-
-	LDA #$27
-	STA PPUCADDR
-	LDA #$C0
-	STA PPUCADDR+1
-	LDA #0
-	STA PPUCLEN
-	LDA #64
-	STA PPUCLEN+1
-	LDA #<OPTIONSATTR
-	STA PPUCINPUT
-	LDA #>OPTIONSATTR
-	STA PPUCINPUT+1
-	JSR PPUCOPY		; Load menu BG attributes into PPU
+	JSR PPUCOPY		; Load options BG tiles into PPU
 
 	LDA #1
 	STA OPTIONSDRAWN
@@ -147,7 +72,7 @@ RETURNTOOPTIONS:
 
 	LDA #0
 	STA NMIPPUCLENH, X
-	LDA #3
+	LDA #2
 	STA NMIPPUCLENL, X
 
 	LDA MUSICEN		; Check if music is disabled
@@ -168,7 +93,7 @@ MUSICDONE:
 	STX NMITRANSFERS	; Load music on/off toggle attributes into PPU during NMI
 
 	; TODO - drawing a sprite like this is ugly but works for now
-	LDA #$20
+	LDA #$30
 	STA ARROWX
 	LDA #$58
 	STA ARROWY
@@ -182,9 +107,9 @@ MUSICDONE:
 .endproc
 
 .proc OPTIONSLOOP
-	;; 20,58 "music" cursor position
-	;; 20,88 "reset" cursor position
-	;; 20,A0 "return" cursor position
+	;; 30,58 "music" cursor position
+	;; 30,98 "reset" cursor position
+	;; 30,B8 "return" cursor position
 	LDA JOY1IN
 	BNE DOWNMUSIC
 	JMP DONE		; Skip loop if player 1 is not pressing buttons
@@ -195,15 +120,15 @@ DOWNMUSIC:
 	LDA ARROWY
 	CMP #$58		; Check if the cursor is in the top position
 	BNE DOWNRESET
-	LDA #$88
+	LDA #$98
 	STA ARROWY		; Move cursor down
 
 	JMP OPTIONSDOUT
 DOWNRESET:
 	LDA ARROWY
-	CMP #$88		; Check if the cursor is in the middle position
+	CMP #$98		; Check if the cursor is in the middle position
 	BNE OPTIONSDOUT
-	LDA #$A0
+	LDA #$B8
 	STA ARROWY		; Move cursor down
 OPTIONSDOUT:
 	JMP DONE
@@ -213,16 +138,16 @@ UPRESET:
 	AND #BUTTON_UP		; Check if player 1 is pressing up
 	BEQ LMUSIC
 	LDA ARROWY
-	CMP #$88		; Check if the cursor is in the middle position
+	CMP #$98		; Check if the cursor is in the middle position
 	BNE UPRETURN
 	LDA #$58
 	STA ARROWY		; Move cursor up
 
 	JMP OPTIONSUOUT
 UPRETURN:
-	CMP #$A0		; Check if the cursor is in the bottom position
+	CMP #$B8		; Check if the cursor is in the bottom position
 	BNE OPTIONSUOUT
-	LDA #$88
+	LDA #$98
 	STA ARROWY		; Move cursor up
 OPTIONSUOUT:
 	JMP DONE
@@ -247,7 +172,7 @@ LMUSIC:
 	STA NMIPPUCADDRL, X
 	LDA #0
 	STA NMIPPUCLENH, X
-	LDA #3
+	LDA #2
 	STA NMIPPUCLENL, X
 	LDA #<MUSICATTRON
 	STA NMIPPUCINPUTH, X
@@ -285,7 +210,7 @@ RMUSIC:
 	STA NMIPPUCADDRL, X
 	LDA #0
 	STA NMIPPUCLENH, X
-	LDA #3
+	LDA #2
 	STA NMIPPUCLENL, X
 	LDA #<MUSICATTROFF
 	STA NMIPPUCINPUTH, X
@@ -302,7 +227,7 @@ STRETURN:
 	AND #BUTTON_START	; Check if player 1 is pressing start
 	BEQ DONE
 	LDA ARROWY
-	CMP #$A0		; Check if the cursor is in the bottom position
+	CMP #$B8		; Check if the cursor is in the bottom position
 	BNE DONE
 
 	JSR SHOWSAVEICON

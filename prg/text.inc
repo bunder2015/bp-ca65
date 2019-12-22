@@ -1,7 +1,7 @@
 .ifndef TEXT_INC
 .define TEXT_INC
 
-.globalzp PBINPUT
+.globalzp PBADDR, PBINPUT
 .global PRINT2BYTES, PRINT1BYTE
 
 .endif

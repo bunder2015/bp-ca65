@@ -21,7 +21,6 @@ SRAMFOOTERTEXT:	.byte "DISCOMBOBULATION"
 SRAMHEADERTEXT:	.byte "THERMOTELEPHONIC"
 
 .segment "FUNCS"
-
 .proc HIDESAVEICON
 	;; Removes the save icon from the screen
 	;; Input: None
