@@ -112,7 +112,9 @@ L1:
 	;; Input: NMITRANSFERS NMIPPUCADDR NMIPPUCINPUT NMIPPUCLEN
 	;; Clobbers: A X
 	LDX NMITRANSFERS	; Get number of transfers
-	BEQ DONE		; Bail out if we have nothing to do
+	BEQ OUT			; Bail out if we have nothing to do
+	TXA
+	PHA			; Save number of transfers
 L1:
 	DEX
 	STX NMITRANSFERS	; Pop a transfer off the list
@@ -139,7 +141,19 @@ L1:
 	TAX
 
 	BNE L1			; Keep going if we have more transfers
-DONE:
+
+	PLA
+	TAX			; Restore number of transfers
+	DEX
+CLEANUP:
+	LDA #$00
+	STA NMIPPUCLENH, X
+	STA NMIPPUCLENL, X
+	TXA
+	BEQ OUT
+	DEX
+	BNE CLEANUP
+OUT:
 	RTS
 .endproc
 
@@ -177,6 +191,9 @@ L1:
 	JMP L1
 DONE:
 	JSR RESETSCR		; Reset PPU scrolling
+	LDA #$00
+	STA PPUCLEN
+	STA PPUCLEN+1
 
 	RTS
 .endproc

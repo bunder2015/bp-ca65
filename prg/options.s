@@ -13,14 +13,15 @@ OPTIONSDRAWN:	.res 1	; Whether the options screen has been drawn
 SKIPSRAMTEST:	.res 1	; Skip PRG RAM tests
 
 .segment "MENUD"
+OPTIONSBG:
+	.incbin "options.nam"
+
 MUSICATTROFF:
 	.byte $00,$A0
 
 MUSICATTRON:
 	.byte $20,$00
 
-OPTIONSBG:
-	.incbin "options.nam"
 
 .segment "MENUS"
 .proc OPTIONS
