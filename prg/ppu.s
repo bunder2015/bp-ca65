@@ -33,7 +33,7 @@ NMIPPUCLENL:	.res 16		; NMIPPUCOPY data lengths (low byte)
 
 .segment "OAM"
 SPRITE0:	.res 4		; Sprite zero
-SPRITES:	.res 252	; The other sprites
+SPRITES:	.res 252	; Sprite 1-63
 
 .segment "FUNCS"
 .proc CLEARSCREEN
@@ -104,8 +104,6 @@ L1:
 	INX
 	BNE L1
 
-;	JSR VBWAIT
-
 	RTS
 .endproc
 
@@ -114,8 +112,8 @@ L1:
 	;; Input: NMITRANSFERS NMIPPUCADDR NMIPPUCINPUT NMIPPUCLEN
 	;; Clobbers: A X
 	LDX NMITRANSFERS	; Get number of transfers
-	BEQ OUT			; Bail out if we have nothing to do
-LOOP:
+	BEQ DONE		; Bail out if we have nothing to do
+L1:
 	DEX
 	STX NMITRANSFERS	; Pop a transfer off the list
 
@@ -140,8 +138,8 @@ LOOP:
 	PLA			; Restore number of transfers
 	TAX
 
-	BNE LOOP		; Keep going if we have more transfers
-OUT:
+	BNE L1			; Keep going if we have more transfers
+DONE:
 	RTS
 .endproc
 
@@ -149,6 +147,13 @@ OUT:
 	;; Copies lengths of data from the CPU to the PPU
 	;; Input: PPUCADDR PPUCLEN PPUCINPUT
 	;; Clobbers: A X Y
+	LDA PPUCLEN
+	BNE SETUP
+	LDA PPUCLEN+1
+	BNE SETUP		; Verify length is not zero
+	BRK
+
+SETUP:
 	BIT PPUSTATUS		; Read PPUSTATUS to reset PPUADDR latch
 	LDA PPUCADDR
 	STA PPUADDR
@@ -282,9 +287,9 @@ L1:
 	LDA NMIREADY		; Load waiting status
 	BNE L1			; Loop if still waiting
 	LDX WAITFRAMES
-	BEQ OUT			; Loop if we need to wait more frames
+	BEQ DONE			; Loop if we need to wait more frames
 	INC NMIREADY
 	JMP L1
-OUT:
+DONE:
 	RTS
 .endproc

@@ -52,7 +52,9 @@ $(objdir)/%.o: $(srcdir)/%.s
 	$(AS65) $< -o $@
 
 $(objdir)/debug.o: $(srcdir)/debug.nam $(srcdir)/debug.pal
+
 $(objdir)/mainmenu.o: $(srcdir)/mainmenu.nam $(srcdir)/mainmenu.pal
+
 $(objdir)/options.o: $(srcdir)/options.nam
 
 # Rules for CHR ROM

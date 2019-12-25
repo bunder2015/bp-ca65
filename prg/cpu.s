@@ -10,7 +10,14 @@ CPUCLEN:	.res 2	; CPUCOPY data length
  	;; Copies lengths of data within the CPU address space
 	;; Input: CPUCADDR CPUCLEN CPUCINPUT
 	;; Clobbers: A X Y
-	LDX #$FF
+	LDA CPUCLEN
+	BNE SETUP
+	LDA CPUCLEN+1
+	BNE SETUP		; Verify length is not zero
+	BRK
+
+SETUP:
+	LDX #$00
 	LDY #$00		; Set loop counters
 
 L1:
@@ -19,10 +26,13 @@ L1:
 	INY
 	CPY CPUCLEN+1
 	BNE L1
-	LDY #$00
+	LDA CPUCLEN
+	BEQ DONE
 	INX
 	CPX CPUCLEN		; Check to see if we have finished copying
-	BNE L1			; Loop if we have not finished copying
-
+	BEQ DONE		; Loop if we have not finished copying
+	INC CPUCINPUT+1
+	JMP L1
+DONE:
 	RTS
 .endproc

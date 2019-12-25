@@ -25,10 +25,7 @@ MENUBG:
 
 MENUPALS:
 	.incbin "mainmenu.pal"
-	.byte $0F,$13,$10,$00	; SPR palette 0
-	.byte $0F,$30,$10,$00	; SPR palette 1
-	.byte $0F,$30,$10,$00	; SPR palette 2
-	.byte $0F,$11,$16,$10	; SPR palette 3
+	.incbin "mainmenu-spr.pal"
 
 MENUTEXT1:
 	.byte "New game"
@@ -233,7 +230,7 @@ STNEW:
 	LDA #0
 	STA MENUDRAWN
 	STA OPTIONSDRAWN
-	LDA CONTINUELEVEL
+	LDA CONTINUELEVEL	; Check if we are starting a new game or continuing from save
 	BNE STCONTINUE
 	JMP STARTNEWGAME	; Go to new game
 STCONTINUE:
