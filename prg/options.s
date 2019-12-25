@@ -35,8 +35,11 @@ DRAW:
 	STA BGEN
 	JSR UPDATEPPUMASK	; Disable rendering
 
-	; TODO - We use the main menus palettes
+	LDA #PD_INC1
+	STA PDINC		; Select 1x PPUDATA address increment mode
+	JSR UPDATEPPUCTRL
 
+	; TODO - We use the main menus palettes
 	LDA #$24
 	STA PPUCADDR
 	LDA #$00
@@ -56,6 +59,8 @@ DRAW:
 RETURNTOOPTIONS:
 	;; We return here from the main menu since the options screen should already be
 	;; drawn from a previous draw
+	LDA #SPR_SZ8
+	STA SPRSZ		; Select 8x8 sprite size
 	LDA #BG_PT0
 	STA BGPT		; Select BG pattern table 0
 	LDA #SPR_PT1

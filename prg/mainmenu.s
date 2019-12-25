@@ -48,6 +48,10 @@ DRAW:
 	STA SPRNOCROP
 	JSR UPDATEPPUMASK	; Disable rendering
 
+	LDA #PD_INC1
+	STA PDINC		; Select 1x PPUDATA address increment mode
+	JSR UPDATEPPUCTRL
+
 	LDA #$3F
 	STA PPUCADDR
 	LDA #$00
@@ -81,6 +85,8 @@ DRAW:
 RETURNTOMENU:
 	;; We return here from the options screen since the main menu screen should already be
 	;; drawn from the initial startup
+	LDA #SPR_SZ8
+	STA SPRSZ		; Select 8x8 sprite size
 	LDA #BG_PT0
 	STA BGPT		; Select BG pattern table 0
 	LDA #SPR_PT1

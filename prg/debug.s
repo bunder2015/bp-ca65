@@ -73,6 +73,10 @@ DEC2:
 	STA BGEN
 	JSR UPDATEPPUMASK	; Disable rendering
 
+	LDA #PD_INC1
+	STA PDINC		; Select 1x PPUDATA address increment mode
+	JSR UPDATEPPUCTRL
+
 	JSR CLEARSCREEN		; Clear the screen of tiles and sprites
 
 	JSR VBWAIT		; Wait for the next vblank to draw register output
@@ -218,6 +222,12 @@ DEC2:
 	STA PBINPUT+1
 	JSR PRINT1BYTE		; Print MMC1 CHR bank 1
 
+	LDA #SPR_SZ8
+	STA SPRSZ		; Select 8x8 sprite size
+	LDA #BG_PT0
+	STA BGPT		; Select BG pattern table 0
+	LDA #SPR_PT1
+	STA SPRPT		; Select sprite pattern table 1
 	LDA #NT_SEL0
 	STA NT			; Select nametable 0
 	JSR UPDATEPPUCTRL

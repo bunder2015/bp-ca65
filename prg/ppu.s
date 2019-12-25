@@ -12,15 +12,17 @@ NMIEN:		.res 1		; NMI enable
 NMIREADY:	.res 1		; Waiting for next frame
 NMITRANSFERS:	.res 1		; NMIPPUCOPY number of transfers (max queue depth 16)
 NT:		.res 1		; Nametable to display
+PDINC:		.res 1		; PPUDATA increment mode
 PPUCADDR:	.res 2		; PPUCOPY destination address
 PPUCINPUT:	.res 2		; PPUCOPY source address
 PPUCLEN:	.res 2		; PPUCOPY data length
+PTEMP:		.res 1		; UPDATEPPUCTRL/UPDATEPPUMASK temp variable
 SCROLLX:	.res 1		; Scroll position X
 SCROLLY:	.res 1		; Scroll position Y
 SPREN:		.res 1		; Sprite render enable
 SPRNOCROP:	.res 1		; Sprite leftmost 8px crop disable
 SPRPT:		.res 1		; Sprite pattern table to display
-PTEMP:		.res 1		; UPDATEPPUCTRL/UPDATEPPUMASK temp variable
+SPRSZ:		.res 1		; Sprite size selection
 WAITFRAMES:	.res 1		; Number of frames to wait
 
 .segment "BSS"
@@ -109,7 +111,7 @@ L1:
 
 .proc NMIPPUCOPY
 	;; Performs PPUCOPYS that were queued for NMI (max queue depth 16)
-	;; Input: NMITRANSFERS NMIPPUCADDR NMIPPUCINPUT NMIPPUCLEN
+	;; Input: NMIPPUCADDR NMIPPUCINPUT NMIPPUCLEN NMITRANSFERS
 	;; Clobbers: A X
 	LDX NMITRANSFERS	; Get number of transfers
 	BEQ OUT			; Bail out if we have nothing to do
@@ -159,7 +161,7 @@ OUT:
 
 .proc PPUCOPY
 	;; Copies lengths of data from the CPU to the PPU
-	;; Input: PPUCADDR PPUCLEN PPUCINPUT
+	;; Input: PPUCADDR PPUCINPUT PPUCLEN
 	;; Clobbers: A X Y
 	LDA PPUCLEN
 	BNE SETUP
@@ -214,7 +216,7 @@ DONE:
 
 .proc UPDATEPPUCTRL
 	;; Selects background/sprite pattern tables, nametables, enables/disables NMI
-	;; Input: BGPT SPRPT NT NMIEN
+	;; Input: BGPT NMIEN NT PDINC SPRPT SPRSZ
 	;; Clobbers: A
 	LDA NMIEN
 	AND #NMI_EN
@@ -222,7 +224,10 @@ DONE:
 
 	; TODO - bit 6 - PPU master/slave selection
 
-	; TODO - bit 5 - Sprite size selection
+	LDA SPRSZ
+	AND #SPR_SZ16
+	ORA PTEMP
+	STA PTEMP		; Bit 5 - Sprite size selection
 
 	LDA BGPT
 	AND #BG_PT1
@@ -234,7 +239,10 @@ DONE:
 	ORA PTEMP
 	STA PTEMP		; Bit 3 - SPR pattern table selection
 
-	; TODO - bit 2 - VRAM address increment mode
+	LDA PDINC
+	AND #PD_INC32
+	ORA PTEMP
+	STA PTEMP		; Bit 2 - PPUDATA address increment mode
 
 	LDA NT
 	AND #NT_SEL3
@@ -248,8 +256,8 @@ DONE:
 .endproc
 
 .proc UPDATEPPUMASK
-	;; Sets b+w/colour modes, enables leftmost 8px cropping, enables rendering, and colour emphasis
-	;; Input: COLOUREN BGNOCROP SPRNOCROP BGEN SPREN CEMPHR CEMPHG CEMPHB
+	;; Sets gray/colour modes, enables leftmost 8px cropping, enables rendering, and colour emphasis
+	;; Input: BGEN BGNOCROP CEMPHB CEMPHG CEMPHR COLOUREN SPREN SPRNOCROP
 	;; Clobbers: A
 	LDA CEMPHB
 	AND #CLR_EMPH_BLUE
@@ -304,7 +312,7 @@ L1:
 	LDA NMIREADY		; Load waiting status
 	BNE L1			; Loop if still waiting
 	LDX WAITFRAMES
-	BEQ DONE			; Loop if we need to wait more frames
+	BEQ DONE		; Loop if we need to wait more frames
 	INC NMIREADY
 	JMP L1
 DONE:
