@@ -117,8 +117,14 @@ MUSICDONE:
 	;; 30,98 "reset" cursor position
 	;; 30,B8 "return" cursor position
 	LDA JOY1IN
-	BNE DOWNMUSIC
-	JMP DONE		; Skip loop if player 1 is not pressing buttons
+	BNE READY
+	LDA #0
+	STA BUTTONHELD
+	JMP DONE2		; Skip loop if player 1 is not pressing buttons
+READY:
+	LDA BUTTONHELD
+	BEQ DOWNMUSIC
+	JMP DONE2		; Skip loop if player 1 is holding buttons
 DOWNMUSIC:
 	LDA JOY1IN
 	AND #BUTTON_DOWN	; Check if player 1 is pressing down
@@ -252,9 +258,16 @@ STRETURN:
 	JSR HIDESAVEICON
 
 	JSR CLEARSPR
+	LDA #1
+	STA BUTTONHELD
+	LDA #15
+	STA WAITFRAMES
 	JSR VBWAIT
 	JMP MAINMENU
 DONE:
+	LDA #1
+	STA BUTTONHELD
+DONE2:
 	JSR VBWAIT		; Wait for next vblank
 	JMP OPTIONSLOOP		; Repeat input loop
 .endproc

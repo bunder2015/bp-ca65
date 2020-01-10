@@ -8,6 +8,7 @@
 .include "sram.inc"
 
 .segment "BSS"
+BUTTONHELD:	.res 1	; Whether a button is being held down
 MENUDRAWN:	.res 1	; Whether the menu screen has been drawn
 
 .segment "FUNCS"
@@ -197,9 +198,15 @@ OUT:
 	;; 50,90 "start/continue" cursor position
 	;; 50,A0 "options" cursor position
 	LDA JOY1IN
-	BNE DOWN
-	JMP DONE		; Skip loop if player 1 is not pressing buttons
+	BNE READY
+	LDA #0
+	STA BUTTONHELD
+	JMP DONE2		; Skip loop if player 1 is not pressing buttons
 
+READY:
+	LDA BUTTONHELD
+	BEQ DOWN
+	JMP DONE2		; Skip loop if player 1 is holding buttons
 DOWN:
 	LDA JOY1IN
 	AND #BUTTON_DOWN	; Check if player 1 is pressing down
@@ -232,7 +239,12 @@ STNEW:
 	CMP #$90		; Check if the cursor is in the top position
 	BNE STOPTS
 ;	JSR pause_song		; Stop music
+	LDA #15
+	STA WAITFRAMES
+	JSR VBWAIT
 	JSR CLEARSCREEN		; Clear screen
+	LDA #1
+	STA BUTTONHELD
 	LDA #0
 	STA MENUDRAWN
 	STA OPTIONSDRAWN
@@ -248,10 +260,17 @@ STOPTS:
 	CMP #$A0		; Check if the cursor is in the bottom position
 	BNE DONE
 	JSR CLEARSPR		; Clear sprites
+	LDA #1
+	STA BUTTONHELD
+	LDA #15
+	STA WAITFRAMES
 	JSR VBWAIT
 	JMP OPTIONS		; Go to game options menu
 
 DONE:
+	LDA #1
+	STA BUTTONHELD
+DONE2:
 	JSR VBWAIT		; Wait for next vblank
 	JMP MENULOOP		; Repeat input loop
 .endproc
