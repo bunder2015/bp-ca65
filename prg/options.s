@@ -114,7 +114,7 @@ MUSICDONE:
 
 .proc OPTIONSLOOP
 	;; 30,58 "music" cursor position
-	;; 30,98 "reset" cursor position
+	;; 30,98 "clear" cursor position
 	;; 30,B8 "return" cursor position
 	LDA JOY1IN
 	BNE READY
@@ -139,7 +139,9 @@ DOWNMUSIC:
 DOWNRESET:
 	LDA ARROWY
 	CMP #$98		; Check if the cursor is in the middle position
-	BNE OPTIONSDOUT
+	BEQ DOWNRESET2
+	JMP DONE2
+DOWNRESET2:
 	LDA #$B8
 	STA ARROWY		; Move cursor down
 OPTIONSDOUT:
@@ -158,7 +160,9 @@ UPRESET:
 	JMP OPTIONSUOUT
 UPRETURN:
 	CMP #$B8		; Check if the cursor is in the bottom position
-	BNE OPTIONSUOUT
+	BEQ UPRETURN2
+	JMP DONE2
+UPRETURN2:
 	LDA #$98
 	STA ARROWY		; Move cursor up
 OPTIONSUOUT:
@@ -170,7 +174,9 @@ LMUSIC:
 	BEQ RMUSIC
 	LDA ARROWY
 	CMP #$58		; Check if the cursor is in the top position
-	BNE OPTIONSLOUT
+	BEQ LMUSIC2
+	JMP DONE2
+LMUSIC2:
 	LDA MUSICEN		; Check if music is disabled
 	BNE OPTIONSLOUT
 	LDA #1			; Turn music toggle on
@@ -206,7 +212,9 @@ RMUSIC:
 	BEQ STRETURN
 	LDA ARROWY
 	CMP #$58		; Check if the cursor is in the top position
-	BNE OPTIONSROUT
+	BEQ RMUSIC2
+	JMP DONE2
+RMUSIC2:
 	LDA MUSICEN		; Check if music is enabled
 	BEQ OPTIONSROUT
 	LDA #0
@@ -237,12 +245,12 @@ OPTIONSROUT:
 STRETURN:
 	LDA JOY1IN
 	AND #BUTTON_START	; Check if player 1 is pressing start
-	BEQ DONE
+	BEQ DONE2
 	LDA ARROWY
 	CMP #$B8		; Check if the cursor is in the bottom position
-	BNE DONE
+	BNE STCLEAR
 
-	JSR SHOWSAVEICON
+	JSR SHOWSAVEICON	; Show save icon
 
 	LDA #MMC1_PRGRAM_EN
 	STA MMCRAM
@@ -255,15 +263,58 @@ STRETURN:
 	STA MMCRAM
 	JSR UPDATEMMC1PRG	; Disable PRG RAM
 
-	JSR HIDESAVEICON
+	JSR HIDESAVEICON	; Hide save icon
 
-	JSR CLEARSPR
+	JSR CLEARSPR		; Clear sprites from the screen
 	LDA #1
 	STA BUTTONHELD
 	LDA #15
 	STA WAITFRAMES
 	JSR VBWAIT
 	JMP MAINMENU
+STCLEAR:
+	CMP #$98
+	BNE DONE2
+
+	JSR SHOWSAVEICON	; Show save icon
+
+	LDA #MMC1_PRGRAM_EN
+	STA MMCRAM
+	JSR UPDATEMMC1PRG	; Enable PRG RAM
+
+	JSR SRAMWIPE		; Wipe the PRG RAM
+
+	LDA #MMC1_PRGRAM_DIS
+	STA MMCRAM
+	JSR UPDATEMMC1PRG	; Disable PRG RAM
+
+	JSR HIDESAVEICON	; Hide save icon
+
+	LDA #1			; Turn music toggle on
+	STA MUSICEN
+
+	LDX NMITRANSFERS
+
+	LDA #$27
+	STA NMIPPUCADDRH, X
+	LDA #$D4
+	STA NMIPPUCADDRL, X
+	LDA #0
+	STA NMIPPUCLENH, X
+	LDA #2
+	STA NMIPPUCLENL, X
+	LDA #<MUSICATTRON
+	STA NMIPPUCINPUTH, X
+	LDA #>MUSICATTRON
+	STA NMIPPUCINPUTL, X
+
+	INX
+	STX NMITRANSFERS	; Load attributes of music toggle into PPU during NMI
+
+;	LDA #song_index_New20song
+;	STA <sound_param_byte_0
+;	JSR play_song		; Start music
+
 DONE:
 	LDA #1
 	STA BUTTONHELD

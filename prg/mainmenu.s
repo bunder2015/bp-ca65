@@ -197,6 +197,7 @@ OUT:
 .proc MENULOOP
 	;; 50,90 "start/continue" cursor position
 	;; 50,A0 "options" cursor position
+	;; 50,B0 "credits" cursor position
 	LDA JOY1IN
 	BNE READY
 	LDA #0
@@ -205,28 +206,42 @@ OUT:
 
 READY:
 	LDA BUTTONHELD
-	BEQ DOWN
+	BEQ DOWNSTART
 	JMP DONE2		; Skip loop if player 1 is holding buttons
-DOWN:
+DOWNSTART:
 	LDA JOY1IN
 	AND #BUTTON_DOWN	; Check if player 1 is pressing down
-	BEQ UP
+	BEQ UPOPTIONS
 	LDA ARROWY
 	CMP #$90		; Check if the cursor is in the top position
-	BNE MENUDOUT
+	BNE DOWNOPTIONS
 	LDA #$A0
+	STA ARROWY		; Move cursor down
+	JMP MENUDOUT
+DOWNOPTIONS:
+	LDA ARROWY
+	CMP #$A0		; Check if the cursor is in the middle position
+	BNE DONE2
+	LDA #$B0
 	STA ARROWY		; Move cursor down
 MENUDOUT:
 	JMP DONE
 
-UP:
+UPOPTIONS:
 	LDA JOY1IN
 	AND #BUTTON_UP		; Check if player 1 is pressing up
 	BEQ STNEW
 	LDA ARROWY
-	CMP #$A0		; Check if the cursor is in the bottom position
-	BNE MENUUOUT
+	CMP #$A0		; Check if the cursor is in the middle position
+	BNE UPCREDITS
 	LDA #$90
+	STA ARROWY		; Move cursor up
+	JMP MENUUOUT
+UPCREDITS:
+	LDA ARROWY
+	CMP #$B0		; Check if the cursor is in the bottom position
+	BNE DONE2
+	LDA #$A0
 	STA ARROWY		; Move cursor up
 MENUUOUT:
 	JMP DONE
@@ -234,17 +249,17 @@ MENUUOUT:
 STNEW:
 	LDA JOY1IN
 	AND #BUTTON_START	; Check if player 1 is pressing start
-	BEQ DONE
+	BEQ DONE2
 	LDA ARROWY
 	CMP #$90		; Check if the cursor is in the top position
 	BNE STOPTS
 ;	JSR pause_song		; Stop music
+	LDA #1
+	STA BUTTONHELD
 	LDA #15
 	STA WAITFRAMES
 	JSR VBWAIT
 	JSR CLEARSCREEN		; Clear screen
-	LDA #1
-	STA BUTTONHELD
 	LDA #0
 	STA MENUDRAWN
 	STA OPTIONSDRAWN
@@ -257,9 +272,9 @@ STCONTINUE:
 	BRK
 STOPTS:
 	LDA ARROWY
-	CMP #$A0		; Check if the cursor is in the bottom position
-	BNE DONE
-	JSR CLEARSPR		; Clear sprites
+	CMP #$A0		; Check if the cursor is in the middle position
+	BNE DONE2
+	JSR CLEARSPR		; Clear sprites from the screen
 	LDA #1
 	STA BUTTONHELD
 	LDA #15

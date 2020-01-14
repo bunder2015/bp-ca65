@@ -126,9 +126,8 @@ MMC1INIT:
 	BEQ NOBRK		; Branch if not set
 	JMP BREAK		; Jump to break handler
 NOBRK:
-	LDA DBGA		; Restore accumulator
-
 	;; TODO - sound code IRQ?
 
+	LDA DBGA		; Restore accumulator
 	RTI			; Exit IRQ
 .endproc

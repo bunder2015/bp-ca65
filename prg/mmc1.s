@@ -39,6 +39,8 @@ resetstub_in "STUB13"
 resetstub_in "STUB14"
 resetstub_in "STUB15"
 
+;;;;;
+
 .segment "ZEROPAGE"
 MMCCHR0:	.res 1	; MMC1 selectable CHR ROM bank 0
 MMCCHR1:	.res 1	; MMC1 selectable CHR ROM bank 1
